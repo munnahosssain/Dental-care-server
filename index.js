@@ -25,31 +25,21 @@ async function run() {
         });
 
         app.get('/available', async (req, res) => {
-            const date = req.query?.formattedDate;
+            const date = req.query.date;
             //step 1: get all service
             const services = await serviceCollection.find().toArray();
             //step 2: get the booking of that day
-            const query = { formattedDate: date };
+            const query = { date: date };
             const bookings = await bookingCollection.find(query).toArray();
-
             //step 3: for each services, find booking for that service
-
             services.forEach(service => {
                 const serviceBookings = bookings.filter(book => book.treatment === service.name);
                 const bkd = service.booked = serviceBookings.map(s => s.slot);
                 const available = service.slots.filter(s => !bkd.includes(s));
-                service.available = available;
+                service.slots = available;
             });
-
-            // services.forEach(service => {
-            //     const serviceBookings = bookings.filter(book => book.treatment === service.name);
-            //     service.booked = serviceBookings.map(s => s.slot);
-            //     // const available = service.slots.filter(s => !booked.includes(s));
-            //     // service.available = available;
-            // });
-
             res.send(services);
-            console.log("bookings", services);
+            console.log(date);
         });
 
         app.post('/booking', async (req, res) => {
@@ -60,7 +50,6 @@ async function run() {
                 return res.send({ success: false, booking: exists })
             }
             const result = await bookingCollection.insertOne(booking);
-            console.log("booking", result);
             res.send({ success: true, result });
         });
     }
@@ -72,7 +61,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('Hello Doctor');
+    res.send('Hello Doctor!');
 })
 
 app.listen(port, () => {

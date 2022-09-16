@@ -39,8 +39,15 @@ async function run() {
                 service.slots = available;
             });
             res.send(services);
-            console.log(date);
         });
+
+        app.get('/booking', async (req, res) => {
+            const patient = req.query.patient;            
+            const query = { patient: patient };
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
+            console.log("bookings found:",bookings);
+        })
 
         app.post('/booking', async (req, res) => {
             const booking = req.body;
